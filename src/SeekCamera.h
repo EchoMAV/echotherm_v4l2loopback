@@ -18,6 +18,10 @@ public:
 	seekcamera_error_t disconnect();
 	seekcamera_error_t handleReadyToPair(seekcamera_t* p_camera);
 
+	std::string const& getDevicePath() const;
+	seekcamera_frame_format_t getFormat() const;
+	seekcamera_color_palette_t getColorPalette() const;
+
 private:
 	int openDevice(int frameWidht, int frameHeight);
 	void handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe);

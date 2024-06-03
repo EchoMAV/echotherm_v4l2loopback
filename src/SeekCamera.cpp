@@ -38,6 +38,19 @@ SeekCamera::SeekCamera(SeekCamera&& that)
 }
 
 
+std::string const& SeekCamera::getDevicePath() const
+{
+	return m_devicePath;
+}
+seekcamera_frame_format_t SeekCamera::getFormat() const
+{
+	return m_format;
+}
+seekcamera_color_palette_t SeekCamera::getColorPalette() const
+{
+	return m_colorPalette;
+}
+
 
 
 seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)

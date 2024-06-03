@@ -34,3 +34,13 @@ build/CMakeFiles/seekcamera_capture.dir/src/main.o
 build/CMakeFiles/seekcamera_capture.dir/src/seekcamera_capture.o
 build/CMakeFiles/seekcamera_capture.dir/src/SeekCamera.o
 build/CMakeFiles/seekcamera_capture.dir/src/SeekCameraLoopHandler.o
+.vscode/settings.json
+build/config.json
+build/.cmake/api/v1/reply/cache-v2-366472c84ad20ba0fe1f.json
+build/.cmake/api/v1/reply/cmakeFiles-v1-7cef69593a04a74eb843.json
+build/.cmake/api/v1/reply/codemodel-v2-742b8ab4a91a6ffccfa3.json
+build/.cmake/api/v1/reply/index-2024-06-03T18-13-33-0408.json
+build/.cmake/api/v1/reply/target-seekcamera_capture-Debug-6575cb8c47856ac2da1f.json
+build/CMakeFiles/seekcamera_capture.dir/src/main.cpp.o
+build/CMakeFiles/seekcamera_capture.dir/src/SeekCamera.cpp.o
+build/CMakeFiles/seekcamera_capture.dir/src/SeekCameraLoopHandler.cpp.o
