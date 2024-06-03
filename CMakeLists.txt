@@ -7,7 +7,13 @@ project(seekcamera_capture DESCRIPTION "Seek Thermal Capture Prototype")
 #Executable configuration
 #--------------------------------------------------------------------------------------------------------------------------#
 add_executable(${PROJECT_NAME}
-	src/seekcamera_capture.cpp
+	src/main.cpp
+	src/SeekCamera.cpp
+	src/SeekCameraLoopHandler.cpp
+)
+
+target_compile_features(${PROJECT_NAME} 
+	PRIVATE cxx_std_17
 )
 
 
