@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 		if(readConfig(configFilePath, cameraMap))
 		{
 			cameraMap.clear();
-			//SeekCamera seekCamera("/dev/video2", SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2, SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
+			//SeekCamera seekCamera("/dev/video0", SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2, SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
 			//cameraMap.emplace("E452AFB41114", ::std::move(seekCamera)).first;
 			//std::cout<<"writing to config file "<<std::filesystem::absolute(configFilePath)<<std::endl;
 			//writeConfig(configFilePath, cameraMap);

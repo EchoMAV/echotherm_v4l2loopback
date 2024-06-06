@@ -84,7 +84,7 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 	auto cameraItr = p_loopHandler->m_cameraMap.find(chipId);
 	if (cameraItr == ::std::end(p_loopHandler->m_cameraMap))
 	{
-		std::cerr << "unkown camera for event: (CID: " << cid << ")" << seekcamera_error_get_str(eventStatus) << std::endl;
+		std::cerr << "unknown camera for event: (CID: " << cid << "): " << seekcamera_error_get_str(eventStatus) << std::endl;
 
 		SeekCamera seekCamera(p_loopHandler->m_defaultDeviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette);
 		cameraItr = p_loopHandler->m_cameraMap.emplace(chipId, ::std::move(seekCamera)).first;

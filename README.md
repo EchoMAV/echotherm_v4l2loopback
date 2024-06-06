@@ -7,11 +7,10 @@ https://github.com/umlaeute/v4l2loopback
 
 $ sudo modprobe v4l2loopback
 
-You then need to force the format
-v4l2loopback-ctl set-caps "video/x-raw, format=YUY2, width=320, height=240" /dev/video2
+The following assumes that your dummy device is named video0. It might be named video1, or video2. 
 
 Verify your dummy device
-v4l2-ctl -d /dev/video2 --all
+$ v4l2-ctl -d /dev/video0 --all
 
 Ensure that the dimensions are 320x240 and the pixel format is 'YUYV' (YUYV 4:2:2)
 
@@ -19,8 +18,7 @@ Run the application.
 
 In another terminal, open a gstreamer pipeline with
 
-gst-launch-1.0 v4l2src device=/dev/video2 ! "video/x-raw,format=(string)YUY2,width=(int)320,height=(int)240,framerate=(fraction)30/1" ! queue ! videoconvert ! x264enc tune=zerolatency speed-preset=ultrafast bitrate=4000 ! rtph264pay config-interval=1 pt=96 ! udpsink host=127.0.0.1 port=5600 sync=false
-
+$ gst-launch-1.0 v4l2src device=/dev/video0 ! "video/x-raw,format=(string)YUY2,width=(int)320,height=(int)240,framerate=(fraction)30/1" ! queue ! videoconvert !  x264enc tune=zerolatency speed-preset=ultrafast bitrate=4000 ! rtph264pay config-interval=1 pt=96 ! udpsink host=127.0.0.1 port=5600 sync=false
 
 This will set the dummy device as the source. convert to I420, and then encode to x264.
 Then it will pass it to rtph264pay to encode it into RTP packets.
@@ -37,10 +35,24 @@ Please refer to the SDK C Programming Guide for details.
 
 To run the application, call the application from the command-line.
 
-## User controls
+You can give it the command-line option "--configFile <FILENAME>" to point it to a configuration
 
-### Color palette
-The color palette can be switched by pressing the mouse keys down in any area of the graphical user interface.
+An example configuation JSON file:
 
-### Quit
-The application can be exited by pressing the `q` key on any active window.
+{
+    "camera_array": [
+        {
+            "cid": "E452AFB41114",
+            "device_path": "\/dev\/video0",
+            "format": "1024",
+            "color_palette": "2"
+        }
+    ]
+}
+
+
+This will open the camera with the chip-ID E452AFB41114 and set it's format to YUY2. The color palette will be set to "spectra"
+
+
+Any cameras not picked up on the configuration will be defaulted to /dev/video0, YUY2 format, and color palette 'white-hot'
+

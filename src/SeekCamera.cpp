@@ -207,11 +207,13 @@ void SeekCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
 			openDevice(frameWidth, frameHeight);
 		}
 		if (m_device >= 0)
-		{
-			int written = write(m_device, seekframe_get_data(p_frame), seekframe_get_data_size(p_frame));
+		{			
+			void* const p_frameData = seekframe_get_data(p_frame);
+			size_t const frameDataSize = seekframe_get_data_size(p_frame);
+			ssize_t written = write(m_device, p_frameData, frameDataSize);
 			if (written < 0)
 			{
-				std::cerr << "Error writing v4l2 device : " << strerror(errno) << " on device with path '" << m_devicePath << "'" << std::endl;
+				std::cerr << "Error writing "<<frameDataSize<<" bytes to v4l2 device : " << strerror(errno) << " on device with path '" << m_devicePath << "'" << std::endl;
 			}
 		}
 	}
