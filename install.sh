@@ -17,3 +17,4 @@ dkms add -m v4l2loopback -v ${version}
 dkms build -m v4l2loopback -v ${version}
 dkms install -m v4l2loopback -v ${version}
 echo "v4l2loopback" > /etc/modules-load.d/v4l2loopback.conf
+rm -rf /usr/src/v4l2loopback-${version}
