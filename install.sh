@@ -27,12 +27,10 @@ dkms build -m v4l2loopback -v ${version}
 dkms install -m v4l2loopback -v ${version}
 # ensure the module loads on startup
 echo "v4l2loopback" > /etc/modules-load.d/v4l2loopback.conf
-# load the module this time
-modprobe vl42loopback
 # clean up the v4l2loopback source
 rm -rf /usr/src/v4l2loopback-${version}
 # Copy over the auto-start script 
-cp seekcamera_capture_autostart.sh /usr/local/bin
+cp ../seekcamera_capture_autostart.sh /usr/local/bin
 # check if the cronjob was already added
 if [ "$(crontab -l | grep -c "seekcamera_capture_autostart.sh")" -lt 1]; then
     #run the auto-start script once a minute
