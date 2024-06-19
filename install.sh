@@ -32,7 +32,7 @@ rm -rf /usr/src/v4l2loopback-${version}
 # Copy over the auto-start script 
 cp ../seekcamera_capture_autostart.sh /usr/local/bin
 # check if the cronjob was already added
-if [ "$(crontab -l | grep -c "seekcamera_capture_autostart.sh")" -lt 1]; then
+if [ "$(crontab -l | grep -c "seekcamera_capture_autostart.sh")" -lt 1 ]; then
     #run the auto-start script once a minute
     (crontab -l 2>/dev/null; echo "* * * * * /usr/local/bin/seekcamera_capture_autostart.sh") | crontab -
 fi
