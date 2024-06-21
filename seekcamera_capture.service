@@ -1,0 +1,18 @@
+[Unit]
+Description=Seek Camera Capture Service
+# After=video.service
+RequiresMountsFor=/usr
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/seekcamera_capture
+StandardOutput=journal
+StandardError=journal
+ExecStartPre=/bin/sleep 15
+StandardOutput=journal
+StandardError=journal
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

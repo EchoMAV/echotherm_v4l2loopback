@@ -30,5 +30,10 @@ echo "v4l2loopback" > /etc/modules-load.d/v4l2loopback.conf
 # clean up the v4l2loopback source
 rm -rf /usr/src/v4l2loopback-${version}
 # Copy over the auto-start script 
-cp ../seekcamera_capture_autostart.sh /usr/local/bin
-chmod +x /usr/local/bin/seekcamera_capture_autostart.sh
+#mkdir -p /usr/local/echopilot/scripts
+#cp ../seekcamera_capture_autostart.sh /usr/local/echopilot/scripts
+#chmod +x /usr/local/echopilot/scripts/seekcamera_capture_autostart.sh
+
+cp ../seekcamera_capture.service /etc/systemd/system/
+systemctl start seekcamera_capture
+systemctl enable seekcamera_capture
