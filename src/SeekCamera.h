@@ -28,7 +28,7 @@ public:
 	seekcamera_color_palette_t getColorPalette() const;
 
 private:
-	seekcamera_error_t openSession();
+	seekcamera_error_t openSession(bool reconnect);
 	seekcamera_error_t closeSession();
 	int openDevice(int frameWidht, int frameHeight);
 	void handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe);

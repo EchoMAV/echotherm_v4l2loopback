@@ -52,13 +52,17 @@ seekcamera_color_palette_t SeekCamera::getColorPalette() const
 	return m_colorPalette;
 }
 
-seekcamera_error_t SeekCamera::openSession()
+seekcamera_error_t SeekCamera::openSession(bool reconnect)
 {
 	// Register a frame available callback function.
-	seekcamera_error_t status = seekcamera_register_frame_available_callback(mp_camera, [](seekcamera_t*, seekcamera_frame_t* p_cameraFrame, void* p_userData) {
+	seekcamera_error_t status = SEEKCAMERA_SUCCESS;
+	if(!reconnect)
+	{
+		status = seekcamera_register_frame_available_callback(mp_camera, [](seekcamera_t*, seekcamera_frame_t* p_cameraFrame, void* p_userData) {
 		auto* p_cameraData = (SeekCamera*)p_userData;
 		p_cameraData->handleCameraFrameAvailable(p_cameraFrame);
 		}, (void*)this);
+	}
 	if (status == SEEKCAMERA_SUCCESS)
 	{
 		// set pipeline mode to SeekVision
@@ -97,7 +101,7 @@ seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)
 {
 	disconnect();
 	mp_camera = p_camera;
-	return openSession();
+	return openSession(false);
 }
 
 
@@ -208,8 +212,9 @@ void SeekCamera::recordTimeout()
 	{
 		if(mp_camera)
 		{
+			std::cout<<"5 timeouts recorded. Resetting camera"<<::std::endl;
 			closeSession();
-			openSession();
+			openSession(true);
 		}
 		m_timeoutCount=0;
 	}
