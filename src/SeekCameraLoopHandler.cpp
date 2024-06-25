@@ -7,7 +7,7 @@
 SeekCameraLoopHandler::SeekCameraLoopHandler()
 	: m_cameraMap{}
 	, m_defaultDeviceName{}
-    , m_defaultColorPalette{}
+    , m_defaultColorPalette{SEEKCAMERA_COLOR_PALETTE_WHITE_HOT}
 	, m_defaultFormat{ }
 	, mp_cameraManager{nullptr}
 {
@@ -28,15 +28,17 @@ SeekCameraLoopHandler::SeekCameraLoopHandler(SeekCameraLoopHandler&& that)
     that.mp_cameraManager=nullptr;
 }
 
+void SeekCameraLoopHandler::setDefaultColorPalette(seekcamera_color_palette_t const colorPalette)
+{
+	m_defaultColorPalette=colorPalette;
+}
 
 
-
-seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string, SeekCamera> cameraMap, std::string defaultDeviceName, seekcamera_frame_format_t defaultFormat, seekcamera_color_palette_t defaultColorPalette)
+seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string, SeekCamera> cameraMap, std::string defaultDeviceName, seekcamera_frame_format_t defaultFormat)
 {
 	m_cameraMap = ::std::move(cameraMap);
 	m_defaultDeviceName = ::std::move(defaultDeviceName);
 	m_defaultFormat = defaultFormat;
-	m_defaultColorPalette = defaultColorPalette;
 	stop();
 	std::cout << "seekcamera_capture prototype starting" << std::endl;
 	seekcamera_error_t status = seekcamera_manager_create(&mp_cameraManager, SEEKCAMERA_IO_TYPE_USB);
