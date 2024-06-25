@@ -103,6 +103,15 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_ERROR:
 			std::cerr << "unhandled camera error: (CID: " << cid << ")" << seekcamera_error_get_str(eventStatus) << std::endl;
+			if(eventStatus==SEEKCAMERA_ERROR_TIMEOUT)
+			{
+				//if 5 consecutive timeouts are recorded, the camera will be restarted
+				seekCamera.recordTimeout();
+			}
+			else
+			{
+				seekCamera.resetTimeouts();
+			}
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_READY_TO_PAIR:
 			seekCamera.handleReadyToPair(p_camera);

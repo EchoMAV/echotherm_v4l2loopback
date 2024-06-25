@@ -17,12 +17,19 @@ public:
 	seekcamera_error_t connect(seekcamera_t* p_camera);
 	seekcamera_error_t disconnect();
 	seekcamera_error_t handleReadyToPair(seekcamera_t* p_camera);
+	//5 timeouts in a row, reconnect the camera
+	//increment the counter. When it reaches 5, disconnect and reconnect
+	void recordTimeout();
+	//reset the counter
+	void resetTimeouts();
 
 	std::string const& getDevicePath() const;
 	seekcamera_frame_format_t getFormat() const;
 	seekcamera_color_palette_t getColorPalette() const;
 
 private:
+	seekcamera_error_t openSession();
+	seekcamera_error_t closeSession();
 	int openDevice(int frameWidht, int frameHeight);
 	void handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe);
 
@@ -33,4 +40,5 @@ private:
 	seekcamera_t* mp_camera;
 	std::mutex m_mut;
 	int m_device;
+	int m_timeoutCount;
 };

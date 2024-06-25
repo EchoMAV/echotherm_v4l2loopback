@@ -16,6 +16,7 @@ SeekCamera::SeekCamera(std::string const& devicePath, seekcamera_frame_format_t 
 	, mp_camera{nullptr}
 	, m_mut{}
 	, m_device{ -1 }
+	, m_timeoutCount{0}
 {
 }
 
@@ -51,12 +52,8 @@ seekcamera_color_palette_t SeekCamera::getColorPalette() const
 	return m_colorPalette;
 }
 
-
-
-seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)
+seekcamera_error_t SeekCamera::openSession()
 {
-	disconnect();
-	mp_camera = p_camera;
 	// Register a frame available callback function.
 	seekcamera_error_t status = seekcamera_register_frame_available_callback(mp_camera, [](seekcamera_t*, seekcamera_frame_t* p_cameraFrame, void* p_userData) {
 		auto* p_cameraData = (SeekCamera*)p_userData;
@@ -96,16 +93,32 @@ seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)
 	return status;
 }
 
+seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)
+{
+	disconnect();
+	mp_camera = p_camera;
+	return openSession();
+}
+
+
+seekcamera_error_t SeekCamera::closeSession()
+{
+	auto const status = seekcamera_capture_session_stop(mp_camera);
+	if (status != SEEKCAMERA_SUCCESS)
+	{
+		std::cerr << "failed to stop capture session: " << seekcamera_error_get_str(status) << std::endl;
+	}
+	return status;
+}
+
+
 seekcamera_error_t SeekCamera::disconnect()
 {
+	m_timeoutCount=0;
 	seekcamera_error_t status = SEEKCAMERA_SUCCESS;
 	if (mp_camera)
 	{
-		status = seekcamera_capture_session_stop(mp_camera);
-		if (status != SEEKCAMERA_SUCCESS)
-		{
-			std::cerr << "failed to stop capture session: " << seekcamera_error_get_str(status) << std::endl;
-		}
+		status = closeSession();
 		mp_camera = nullptr;
 	}
 	if (m_device >= 0)
@@ -186,6 +199,25 @@ int SeekCamera::openDevice(int width, int height)
 	std::cout << "v4l2 is not supported on this platform" << std::endl;
 #endif
 	return returnCode;
+}
+
+void SeekCamera::recordTimeout()
+{
+	++m_timeoutCount;
+	if(m_timeoutCount>=5)
+	{
+		if(mp_camera)
+		{
+			closeSession();
+			openSession();
+		}
+		m_timeoutCount=0;
+	}
+}
+
+void SeekCamera::resetTimeouts()
+{
+	m_timeoutCount=0;
 }
 
 void SeekCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
