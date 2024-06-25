@@ -259,5 +259,7 @@ void SeekCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
 		std::cerr << "failed to get frame: " << seekcamera_error_get_str(status) << std::endl;
 	}
 	seekcamera_frame_unlock(p_cameraframe);
+	resetTimeouts();
+
 }
 
