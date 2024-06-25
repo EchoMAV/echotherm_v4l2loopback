@@ -62,7 +62,7 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 			::std::ifstream inputStream(configFilePath);
 			boost::property_tree::read_json(inputStream,properties);
 
-			seekcamera_color_palette_t defaultColorPallete = (seekcamera_color_palette_t)properties.get<int>("default_color_palette", (int)SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
+			seekcamera_color_palette_t defaultColorPallete = (seekcamera_color_palette_t)properties.get<int>("default_color_palette");
 
 			g_loopHandler.setDefaultColorPalette(defaultColorPallete);
 
@@ -120,10 +120,10 @@ int main(int argc, char* argv[])
 			std::cout<<"configFile = "<<configFilePath<<std::endl;
 
 
-			SeekCamera seekCamera("/dev/video0", SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2, SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
-			cameraMap.emplace("E452AFB41114", ::std::move(seekCamera)).first;
-			std::cout<<"writing to config file "<<std::filesystem::absolute(configFilePath)<<std::endl;
-			writeConfig(configFilePath, cameraMap);
+			//SeekCamera seekCamera("/dev/video0", SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2, SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
+			//cameraMap.emplace("E452AFB41114", ::std::move(seekCamera)).first;
+			//std::cout<<"writing to config file "<<std::filesystem::absolute(configFilePath)<<std::endl;
+			//writeConfig(configFilePath, cameraMap);
 		}
 		else
 		{
