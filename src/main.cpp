@@ -63,8 +63,10 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 			boost::property_tree::read_json(inputStream,properties);
 
 			seekcamera_color_palette_t defaultColorPallete = (seekcamera_color_palette_t)properties.get<int>("default_color_palette");
+			seekcamera_shutter_mode_t defaultShutterMode = (seekcamera_shutter_mode_t)properties.get<int>("default_shutter_mode");
 
 			g_loopHandler.setDefaultColorPalette(defaultColorPallete);
+			g_loopHandler.setDefaultShutterMode(defaultShutterMode);
 
 			auto cameraArray = properties.get_child("camera_array");
 
@@ -74,8 +76,9 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 				auto devicePath = cameraProps.get<std::string>("device_path");
 				auto format = (seekcamera_frame_format_t)cameraProps.get<int>("format");
 				auto colorPalette = (seekcamera_color_palette_t)cameraProps.get<int>("color_palette", (int)defaultColorPallete);
+				auto shutterMode = (seekcamera_shutter_mode_t)cameraProps.get<int>("shutter_mode", (int)defaultShutterMode);
 
-				SeekCamera camera(devicePath, format, colorPalette);
+				SeekCamera camera(devicePath, format, colorPalette, shutterMode);
 				cameraMap.emplace(cid, ::std::move(camera));
 				
 

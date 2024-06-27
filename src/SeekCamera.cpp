@@ -9,10 +9,11 @@
 #include <sys/ioctl.h>
 #endif
 
-SeekCamera::SeekCamera(std::string const& devicePath, seekcamera_frame_format_t format, seekcamera_color_palette_t colorPalette)
+SeekCamera::SeekCamera(std::string const& devicePath, seekcamera_frame_format_t format, seekcamera_color_palette_t colorPalette, seekcamera_shutter_mode_t shutterMode)
 	: m_devicePath{devicePath}
 	, m_format{format}
 	, m_colorPalette{ colorPalette }
+	, m_shutterMode{ shutterMode }
 	, mp_camera{nullptr}
 	, m_mut{}
 	, m_device{ -1 }
@@ -30,6 +31,7 @@ SeekCamera::SeekCamera(SeekCamera&& that)
     : m_devicePath{std::move(that.m_devicePath)}
     , m_format{std::move(that.m_format)}
     , m_colorPalette{std::move(that.m_colorPalette)}
+	, m_shutterMode{std::move(that.m_shutterMode)}
     , mp_camera{that.mp_camera}
     , m_mut{}
     , m_device{that.m_device}
@@ -50,6 +52,11 @@ seekcamera_frame_format_t SeekCamera::getFormat() const
 seekcamera_color_palette_t SeekCamera::getColorPalette() const
 {
 	return m_colorPalette;
+}
+
+seekcamera_shutter_mode_t SeekCamera::getShutterMode() const
+{
+	return m_shutterMode;
 }
 
 seekcamera_error_t SeekCamera::openSession(bool reconnect)
@@ -73,16 +80,22 @@ seekcamera_error_t SeekCamera::openSession(bool reconnect)
 			status = seekcamera_capture_session_start(mp_camera, m_format);
 			if (status == SEEKCAMERA_SUCCESS)
 			{
-				status = seekcamera_set_color_palette(mp_camera, m_colorPalette);
-				if (status != SEEKCAMERA_SUCCESS)
+				auto const shutterStatus = seekcamera_set_shutter_mode(mp_camera, m_shutterMode);
+				if(shutterStatus != SEEKCAMERA_SUCCESS)
 				{
-					::std::cout << "failed to set color palette to " << seekcamera_color_palette_get_str(m_colorPalette) << ": " << seekcamera_error_get_str(status) << std::endl;
+					::std::cout << "failed to set shutter mode to " << (m_shutterMode == SEEKCAMERA_SHUTTER_MODE_AUTO ? "auto" : "manual") << ": " << seekcamera_error_get_str(shutterStatus) << std::endl;
+					status = shutterStatus;
+				}
+				auto const paletteStatus = seekcamera_set_color_palette(mp_camera, m_colorPalette);
+				if(paletteStatus != SEEKCAMERA_SUCCESS)
+				{
+					::std::cout << "failed to set color palette to " << seekcamera_color_palette_get_str(m_colorPalette) << ": " << seekcamera_error_get_str(paletteStatus) << std::endl;
+					status = paletteStatus;
 				}
 			}
 			else
 			{
 				std::cerr << "failed to start capture session: " << seekcamera_error_get_str(status) << std::endl;
-
 			}
 		}
 		else
@@ -205,19 +218,9 @@ int SeekCamera::openDevice(int width, int height)
 	return returnCode;
 }
 
-void SeekCamera::recordTimeout()
+int SeekCamera::recordTimeout()
 {
-	++m_timeoutCount;
-	if(m_timeoutCount>=5)
-	{
-		if(mp_camera)
-		{
-			std::cout<<"5 timeouts recorded. Resetting camera"<<::std::endl;
-			closeSession();
-			openSession(true);
-		}
-		m_timeoutCount=0;
-	}
+	return ++m_timeoutCount;
 }
 
 void SeekCamera::resetTimeouts()
@@ -261,5 +264,16 @@ void SeekCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
 	seekcamera_frame_unlock(p_cameraframe);
 	resetTimeouts();
 
+}
+
+
+seekcamera_error_t SeekCamera::triggerShutter()
+{
+	auto const status = seekcamera_shutter_trigger(mp_camera);
+	if(status != SEEKCAMERA_SUCCESS)
+	{
+		std::cerr << "failed to trigger shutter: " << seekcamera_error_get_str(status) << std::endl;
+	}
+	return status;
 }
 

@@ -8,6 +8,7 @@ SeekCameraLoopHandler::SeekCameraLoopHandler()
 	: m_cameraMap{}
 	, m_defaultDeviceName{}
     , m_defaultColorPalette{SEEKCAMERA_COLOR_PALETTE_WHITE_HOT}
+	, m_defaultShutterMode{SEEKCAMERA_SHUTTER_MODE_AUTO}
 	, m_defaultFormat{ }
 	, mp_cameraManager{nullptr}
 {
@@ -22,6 +23,7 @@ SeekCameraLoopHandler::SeekCameraLoopHandler(SeekCameraLoopHandler&& that)
     : m_cameraMap{std::move(that.m_cameraMap)}
     , m_defaultDeviceName{std::move(that.m_defaultDeviceName)}
     , m_defaultColorPalette{std::move(that.m_defaultColorPalette)}
+	, m_defaultShutterMode{std::move(that.m_defaultShutterMode)}
     , m_defaultFormat{std::move(that.m_defaultFormat)}
     , mp_cameraManager{that.mp_cameraManager}
 {
@@ -31,6 +33,11 @@ SeekCameraLoopHandler::SeekCameraLoopHandler(SeekCameraLoopHandler&& that)
 void SeekCameraLoopHandler::setDefaultColorPalette(seekcamera_color_palette_t const colorPalette)
 {
 	m_defaultColorPalette=colorPalette;
+}
+
+void SeekCameraLoopHandler::setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode)
+{
+	m_defaultShutterMode=shutterMode;
 }
 
 
@@ -88,7 +95,7 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 	{
 		std::cerr << "unknown camera for event: (CID: " << cid << "): " << seekcamera_error_get_str(eventStatus) << std::endl;
 
-		SeekCamera seekCamera(p_loopHandler->m_defaultDeviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette);
+		SeekCamera seekCamera(p_loopHandler->m_defaultDeviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette, p_loopHandler->m_defaultShutterMode);
 		cameraItr = p_loopHandler->m_cameraMap.emplace(chipId, ::std::move(seekCamera)).first;
 	}
 	{
@@ -103,15 +110,6 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_ERROR:
 			std::cerr << "unhandled camera error: (CID: " << cid << ")" << seekcamera_error_get_str(eventStatus) << std::endl;
-			if(eventStatus==SEEKCAMERA_ERROR_TIMEOUT)
-			{
-				//if 5 consecutive timeouts are recorded, the camera will be restarted
-				seekCamera.recordTimeout();
-			}
-			else
-			{
-				seekCamera.resetTimeouts();
-			}
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_READY_TO_PAIR:
 			seekCamera.handleReadyToPair(p_camera);

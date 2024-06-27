@@ -28,6 +28,7 @@ public:
 
 
 	void setDefaultColorPalette(seekcamera_color_palette_t const colorPalette);
+	void setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode);
 
 
 private:
@@ -39,6 +40,7 @@ private:
 	std::unordered_map< std::string, SeekCamera> m_cameraMap;
 	std::string m_defaultDeviceName;
 	seekcamera_color_palette_t m_defaultColorPalette;
+	seekcamera_shutter_mode_t m_defaultShutterMode;
 	seekcamera_frame_format_t m_defaultFormat;
 	seekcamera_manager_t* mp_cameraManager;
 };
