@@ -68,20 +68,20 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 			g_loopHandler.setDefaultColorPalette(defaultColorPallete);
 			g_loopHandler.setDefaultShutterMode(defaultShutterMode);
 
-			auto cameraArray = properties.get_child("camera_array");
-
-			for(auto const& [key,cameraProps] : cameraArray)
+			auto cameraArrayOpt = properties.get_child_optional("camera_array");
+			if(cameraArrayOpt.is_initialized())
 			{
-				auto cid = cameraProps.get<std::string>("cid");
-				auto devicePath = cameraProps.get<std::string>("device_path");
-				auto format = (seekcamera_frame_format_t)cameraProps.get<int>("format");
-				auto colorPalette = (seekcamera_color_palette_t)cameraProps.get<int>("color_palette", (int)defaultColorPallete);
-				auto shutterMode = (seekcamera_shutter_mode_t)cameraProps.get<int>("shutter_mode", (int)defaultShutterMode);
+				for(auto const& [key,cameraProps] : cameraArrayOpt.get())
+				{
+					auto cid = cameraProps.get<std::string>("cid");
+					auto devicePath = cameraProps.get<std::string>("device_path");
+					auto format = (seekcamera_frame_format_t)cameraProps.get<int>("format");
+					auto colorPalette = (seekcamera_color_palette_t)cameraProps.get<int>("color_palette", (int)defaultColorPallete);
+					auto shutterMode = (seekcamera_shutter_mode_t)cameraProps.get<int>("shutter_mode", (int)defaultShutterMode);
 
-				SeekCamera camera(devicePath, format, colorPalette, shutterMode);
-				cameraMap.emplace(cid, ::std::move(camera));
-				
-
+					SeekCamera camera(devicePath, format, colorPalette, shutterMode);
+					cameraMap.emplace(cid, ::std::move(camera));
+				}
 			}
 			returnCode=0;
 		}
