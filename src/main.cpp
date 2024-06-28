@@ -16,6 +16,7 @@ void sighandler(int signum)
 	std::cout << "Caught termination signal";
 	std::cout << std::endl;
 	g_loopHandler.stop();
+	exit(0);
 }
 
 void writeConfig(::std::filesystem::path const& path, ::std::unordered_map<::std::string, SeekCamera> & cameraMap)
