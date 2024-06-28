@@ -43,6 +43,7 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 	if(std::filesystem::exists(configFilePath)
 		&& std::filesystem::is_regular_file(configFilePath))
 	{
+		std::cout<<"configFile exists"<<std::endl;
 		boost::property_tree::ptree properties;
 		try
 		{
@@ -131,6 +132,7 @@ int main(int argc, char* argv[])
 	}
 	if(notifyFileDescriptor >=0 && notifyWatchDescriptor>=0)
 	{
+		std::cout<<"watching config file"<<std::endl;
 		//watch a config file and reload when it changes
 		for(;;)
 		{
@@ -143,9 +145,11 @@ int main(int argc, char* argv[])
 			{
 				break;
 			}
+			std::cout<<"started camera manager"<<std::endl;
 			char p_buffer[sizeof(inotify_event) + 16];
 			// wait until the configuration file is modified
 			auto const length=read(notifyFileDescriptor, p_buffer, sizeof(inotify_event) + 16);
+			std::cout<<"change in config file detected"<<std::endl;
 			if(length<0)
 			{
 				std::cerr<<"read failed: "<<strerror(errno)<<std::endl;
