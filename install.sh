@@ -34,6 +34,8 @@ rm -rf /usr/src/v4l2loopback-${version}
 #cp ../seekcamera_capture_autostart.sh /usr/local/echopilot/scripts
 #chmod +x /usr/local/echopilot/scripts/seekcamera_capture_autostart.sh
 
+cp ../seekcamera_capture_config.json /usr/local/bin
+
 cp ../seekcamera_capture.service /etc/systemd/system/
 systemctl start seekcamera_capture
 systemctl enable seekcamera_capture

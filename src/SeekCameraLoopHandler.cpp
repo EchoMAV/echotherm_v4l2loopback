@@ -7,7 +7,8 @@
 SeekCameraLoopHandler::SeekCameraLoopHandler()
 	: m_cameraMap{}
 	, m_defaultDeviceName{}
-    , m_defaultColorPalette{}
+    , m_defaultColorPalette{SEEKCAMERA_COLOR_PALETTE_WHITE_HOT}
+	, m_defaultShutterMode{SEEKCAMERA_SHUTTER_MODE_AUTO}
 	, m_defaultFormat{ }
 	, mp_cameraManager{nullptr}
 {
@@ -22,21 +23,29 @@ SeekCameraLoopHandler::SeekCameraLoopHandler(SeekCameraLoopHandler&& that)
     : m_cameraMap{std::move(that.m_cameraMap)}
     , m_defaultDeviceName{std::move(that.m_defaultDeviceName)}
     , m_defaultColorPalette{std::move(that.m_defaultColorPalette)}
+	, m_defaultShutterMode{std::move(that.m_defaultShutterMode)}
     , m_defaultFormat{std::move(that.m_defaultFormat)}
     , mp_cameraManager{that.mp_cameraManager}
 {
     that.mp_cameraManager=nullptr;
 }
 
+void SeekCameraLoopHandler::setDefaultColorPalette(seekcamera_color_palette_t const colorPalette)
+{
+	m_defaultColorPalette=colorPalette;
+}
+
+void SeekCameraLoopHandler::setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode)
+{
+	m_defaultShutterMode=shutterMode;
+}
 
 
-
-seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string, SeekCamera> cameraMap, std::string defaultDeviceName, seekcamera_frame_format_t defaultFormat, seekcamera_color_palette_t defaultColorPalette)
+seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string, SeekCamera> cameraMap, std::string defaultDeviceName, seekcamera_frame_format_t defaultFormat)
 {
 	m_cameraMap = ::std::move(cameraMap);
 	m_defaultDeviceName = ::std::move(defaultDeviceName);
 	m_defaultFormat = defaultFormat;
-	m_defaultColorPalette = defaultColorPalette;
 	stop();
 	std::cout << "seekcamera_capture prototype starting" << std::endl;
 	seekcamera_error_t status = seekcamera_manager_create(&mp_cameraManager, SEEKCAMERA_IO_TYPE_USB);
@@ -86,7 +95,7 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 	{
 		std::cerr << "unknown camera for event: (CID: " << cid << "): " << seekcamera_error_get_str(eventStatus) << std::endl;
 
-		SeekCamera seekCamera(p_loopHandler->m_defaultDeviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette);
+		SeekCamera seekCamera(p_loopHandler->m_defaultDeviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette, p_loopHandler->m_defaultShutterMode);
 		cameraItr = p_loopHandler->m_cameraMap.emplace(chipId, ::std::move(seekCamera)).first;
 	}
 	{
