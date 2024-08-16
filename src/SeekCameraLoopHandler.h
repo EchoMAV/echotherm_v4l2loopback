@@ -5,6 +5,7 @@
 #include <string>
 #include "seekcamera/seekcamera.h"
 #include "seekcamera/seekcamera_manager.h"
+#include <filesystem>
 
 
 
@@ -26,6 +27,8 @@ public:
 
 	void stop();
 
+	void setConfigFile(std::string const& configFile);
+
 
 	void setDefaultColorPalette(seekcamera_color_palette_t const colorPalette);
 	void setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode);
@@ -43,4 +46,5 @@ private:
 	seekcamera_shutter_mode_t m_defaultShutterMode;
 	seekcamera_frame_format_t m_defaultFormat;
 	seekcamera_manager_t* mp_cameraManager;
+	std::filesystem::path m_configFile;
 };

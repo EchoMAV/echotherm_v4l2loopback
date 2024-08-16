@@ -65,6 +65,11 @@ seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string,
 	return status;
 }
 
+void SeekCameraLoopHandler::setConfigFile(std::string const& configFile)
+{
+	m_configFile=configFile;
+}
+
 void SeekCameraLoopHandler::stop()
 {
 	if (mp_cameraManager)
@@ -110,6 +115,16 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_ERROR:
 			std::cerr << "unhandled camera error: (CID: " << cid << ")" << seekcamera_error_get_str(eventStatus) << std::endl;
+			if(std::filesystem::exists(p_loopHandler->m_configFile))
+			{
+				//touch the config file to force the manager to re-load itself
+				std::error_code ec;
+				std::filesystem::last_write_time(p_loopHandler->m_configFile, std::filesystem::file_time_type::clock::now(), ec);
+				if(ec)
+				{
+					std::cerr <<"Error while touching config file "<<p_loopHandler->m_configFile<<": "<<ec<<std::endl;
+				}
+			}
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_READY_TO_PAIR:
 			seekCamera.handleReadyToPair(p_camera);

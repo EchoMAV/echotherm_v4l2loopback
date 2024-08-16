@@ -131,6 +131,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+	int returnCode=0;
 	if(notifyFileDescriptor >=0 && notifyWatchDescriptor>=0)
 	{
 		std::cout<<"watching config file"<<std::endl;
@@ -162,20 +163,8 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		//no config file, just press a key to exit
-		auto status = g_loopHandler.start(::std::move(cameraMap));
-		if (status == SEEKCAMERA_SUCCESS)
-		{
-			std::cout << "press enter to quit" << ::std::endl;
-			for (;;)
-			{
-				int c = getchar();
-				if (c == '\n')
-				{
-					break;
-				}
-			}
-		}
+		returnCode=1;
+		std::cerr<<"A configFile is required"<<std::endl;
 	}
 	(void)inotify_rm_watch( notifyFileDescriptor, notifyWatchDescriptor );
 	(void)close( notifyFileDescriptor );

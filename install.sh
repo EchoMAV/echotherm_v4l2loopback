@@ -1,3 +1,13 @@
+#! /bin/bash
+arch=$(uname -m)
+if [[ $arch == x86_64* ]]; then
+    echo "installing on x86_64 architecture"
+elif [[ $arch == aarch64* ]]; then
+    echo "installing on aarch64 architecture"
+else
+    echo "unrecognized architecture"
+    exit 1
+fi
 # install all the stuff you'll need (dkms, cmake, boost, gstreamer)
 apt update
 apt install -y dkms cmake libboost-all-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
@@ -5,7 +15,11 @@ apt install -y dkms cmake libboost-all-dev libgstreamer1.0-dev libgstreamer-plug
 version=0.12.5
 curl -L https://github.com/umlaeute/v4l2loopback/archive/v${version}.tar.gz | tar xvz -C /usr/src
 # copy seek-thermal libs and include files
-cp lib/* /usr/local/lib
+if [[ $arch == x86_64* ]]; then
+    cp lib/x86_64-linux-gnu/* /usr/local/lib
+else
+    cp lib/aarch64-linux-gnu/* /usr/local/lib
+fi
 cp -r include/* /usr/local/include
 # copy the device rules
 cp driver/udev/10-seekthermal.rules /etc/udev/rules.d
@@ -37,5 +51,5 @@ rm -rf /usr/src/v4l2loopback-${version}
 cp ../seekcamera_capture_config.json /usr/local/bin
 
 cp ../seekcamera_capture.service /etc/systemd/system/
-systemctl start seekcamera_capture
+systemctl start seekcamera_capture&
 systemctl enable seekcamera_capture
