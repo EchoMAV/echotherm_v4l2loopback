@@ -1,6 +1,6 @@
 #! /bin/bash
-systemctl stop echotherm_v4l2loopback&
-systemctl disable echotherm_v4l2loopback
+systemctl stop echotherm_v4l2loopback.service&
+systemctl disable echotherm_v4l2loopback.service
 rm /etc/systemd/system/echotherm_v4l2loopback.service
 rm /usr/local/bin/echotherm_v4l2loopback_config.json
 rm /usr/local/bin/echotherm_v4l2loopback
