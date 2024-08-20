@@ -1,25 +1,25 @@
-#include "SeekCameraLoopHandler.h"
+#include "EchoThermCameraLoopHandler.h"
 
-#include "SeekCamera.h"
+#include "EchoThermCamera.h"
 #include <iostream>
 
 
-SeekCameraLoopHandler::SeekCameraLoopHandler()
+EchoThermCameraLoopHandler::EchoThermCameraLoopHandler()
 	: m_cameraMap{}
 	, m_defaultDeviceName{}
     , m_defaultColorPalette{SEEKCAMERA_COLOR_PALETTE_WHITE_HOT}
 	, m_defaultShutterMode{SEEKCAMERA_SHUTTER_MODE_AUTO}
-	, m_defaultFormat{ }
+	, m_defaultFormat{ SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2}
 	, mp_cameraManager{nullptr}
 {
 }
 
-SeekCameraLoopHandler::~SeekCameraLoopHandler()
+EchoThermCameraLoopHandler::~EchoThermCameraLoopHandler()
 {
 	stop();
 }
 
-SeekCameraLoopHandler::SeekCameraLoopHandler(SeekCameraLoopHandler&& that)
+EchoThermCameraLoopHandler::EchoThermCameraLoopHandler(EchoThermCameraLoopHandler&& that)
     : m_cameraMap{std::move(that.m_cameraMap)}
     , m_defaultDeviceName{std::move(that.m_defaultDeviceName)}
     , m_defaultColorPalette{std::move(that.m_defaultColorPalette)}
@@ -30,24 +30,30 @@ SeekCameraLoopHandler::SeekCameraLoopHandler(SeekCameraLoopHandler&& that)
     that.mp_cameraManager=nullptr;
 }
 
-void SeekCameraLoopHandler::setDefaultColorPalette(seekcamera_color_palette_t const colorPalette)
+void EchoThermCameraLoopHandler::setDefaultColorPalette(seekcamera_color_palette_t const colorPalette)
 {
 	m_defaultColorPalette=colorPalette;
 }
 
-void SeekCameraLoopHandler::setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode)
+void EchoThermCameraLoopHandler::setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode)
 {
 	m_defaultShutterMode=shutterMode;
 }
 
+void EchoThermCameraLoopHandler::setDefaultDeviceName(std::string const& deviceName)
+{
+	m_defaultDeviceName=deviceName;
+}
+void EchoThermCameraLoopHandler::setDefaultFrameFormat(seekcamera_frame_format_t const frameFormat)
+{
+	m_defaultFormat=frameFormat;
+}
 
-seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string, SeekCamera> cameraMap, std::string defaultDeviceName, seekcamera_frame_format_t defaultFormat)
+seekcamera_error_t EchoThermCameraLoopHandler::start(std::unordered_map< std::string, EchoThermCamera> cameraMap)
 {
 	m_cameraMap = ::std::move(cameraMap);
-	m_defaultDeviceName = ::std::move(defaultDeviceName);
-	m_defaultFormat = defaultFormat;
 	stop();
-	std::cout << "seekcamera_capture prototype starting" << std::endl;
+	std::cout << "echotherm_v4l2loopback starting" << std::endl;
 	seekcamera_error_t status = seekcamera_manager_create(&mp_cameraManager, SEEKCAMERA_IO_TYPE_USB);
 	if (status == SEEKCAMERA_SUCCESS)
 	{
@@ -65,16 +71,16 @@ seekcamera_error_t SeekCameraLoopHandler::start(std::unordered_map< std::string,
 	return status;
 }
 
-void SeekCameraLoopHandler::setConfigFile(std::string const& configFile)
+void EchoThermCameraLoopHandler::setConfigFile(std::string const& configFile)
 {
 	m_configFile=configFile;
 }
 
-void SeekCameraLoopHandler::stop()
+void EchoThermCameraLoopHandler::stop()
 {
 	if (mp_cameraManager)
 	{
-		std::cout << "seekcamera_capture prototype stopping" << std::endl;
+		std::cout << "echotherm_v4l2loopback stopping" << std::endl;
 		// Teardown the camera manager.
 		seekcamera_manager_destroy(&mp_cameraManager);
 
@@ -87,31 +93,40 @@ void SeekCameraLoopHandler::stop()
 }
 
 
-void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcamera_manager_event_t event, seekcamera_error_t eventStatus, void* p_userData)
+void EchoThermCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcamera_manager_event_t event, seekcamera_error_t eventStatus, void* p_userData)
 {
 	seekcamera_chipid_t cid{};
 	seekcamera_get_chipid(p_camera, &cid);
 	std::cout << seekcamera_manager_get_event_str(event) << " (CID: " << cid << ")" << std::endl;
 	seekcamera_get_chipid(p_camera, &cid);
-	SeekCameraLoopHandler* p_loopHandler = (SeekCameraLoopHandler*)p_userData;
+	EchoThermCameraLoopHandler* p_loopHandler = (EchoThermCameraLoopHandler*)p_userData;
 	std::string chipId((char*)&cid);
 	auto cameraItr = p_loopHandler->m_cameraMap.find(chipId);
 	if (cameraItr == ::std::end(p_loopHandler->m_cameraMap))
 	{
 		std::cerr << "unknown camera for event: (CID: " << cid << "): " << seekcamera_error_get_str(eventStatus) << std::endl;
 
-		SeekCamera seekCamera(p_loopHandler->m_defaultDeviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette, p_loopHandler->m_defaultShutterMode);
-		cameraItr = p_loopHandler->m_cameraMap.emplace(chipId, ::std::move(seekCamera)).first;
+		std::string deviceName;
+		if(p_loopHandler->m_defaultDeviceName.empty())
+		{
+			deviceName="/dev/video0";
+		}
+		else
+		{
+			deviceName=p_loopHandler->m_defaultDeviceName;
+		}
+		EchoThermCamera echoThermCamera(deviceName, p_loopHandler->m_defaultFormat, p_loopHandler->m_defaultColorPalette, p_loopHandler->m_defaultShutterMode);
+		cameraItr = p_loopHandler->m_cameraMap.emplace(chipId, ::std::move(echoThermCamera)).first;
 	}
 	{
-		SeekCamera& seekCamera = cameraItr->second;
+		EchoThermCamera& echoThermCamera = cameraItr->second;
 		switch (event)
 		{
 		case SEEKCAMERA_MANAGER_EVENT_CONNECT:
-			seekCamera.connect(p_camera);
+			echoThermCamera.connect(p_camera);
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_DISCONNECT:
-			seekCamera.disconnect();
+			echoThermCamera.disconnect();
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_ERROR:
 			std::cerr << "unhandled camera error: (CID: " << cid << ")" << seekcamera_error_get_str(eventStatus) << std::endl;
@@ -127,7 +142,7 @@ void SeekCameraLoopHandler::cameraEventCallback(seekcamera_t* p_camera, seekcame
 			}
 			break;
 		case SEEKCAMERA_MANAGER_EVENT_READY_TO_PAIR:
-			seekCamera.handleReadyToPair(p_camera);
+			echoThermCamera.handleReadyToPair(p_camera);
 			break;
 		default:
 			break;

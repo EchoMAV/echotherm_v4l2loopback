@@ -1,5 +1,5 @@
 #pragma once
-#include "SeekCamera.h"
+#include "EchoThermCamera.h"
 
 #include <unordered_map>
 #include <string>
@@ -7,23 +7,19 @@
 #include "seekcamera/seekcamera_manager.h"
 #include <filesystem>
 
-
-
-class SeekCameraLoopHandler
+class EchoThermCameraLoopHandler
 {
 public:
-	SeekCameraLoopHandler();
-	~SeekCameraLoopHandler();
-    SeekCameraLoopHandler(SeekCameraLoopHandler const& that)=delete;
-    SeekCameraLoopHandler(SeekCameraLoopHandler&& that);
-    SeekCameraLoopHandler& operator=(SeekCameraLoopHandler const& that)=delete;
-    SeekCameraLoopHandler& operator=(SeekCameraLoopHandler&& that)=delete;
+	EchoThermCameraLoopHandler();
+	~EchoThermCameraLoopHandler();
+    EchoThermCameraLoopHandler(EchoThermCameraLoopHandler const& that)=delete;
+    EchoThermCameraLoopHandler(EchoThermCameraLoopHandler&& that);
+    EchoThermCameraLoopHandler& operator=(EchoThermCameraLoopHandler const& that)=delete;
+    EchoThermCameraLoopHandler& operator=(EchoThermCameraLoopHandler&& that)=delete;
 
 
 	seekcamera_error_t start(
-		std::unordered_map< std::string, SeekCamera> cameraMap
-		, std::string defaultDeviceName = "/dev/video0"
-		, seekcamera_frame_format_t defaultFormat = SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2);
+		std::unordered_map< std::string, EchoThermCamera> cameraMap);
 
 	void stop();
 
@@ -32,7 +28,8 @@ public:
 
 	void setDefaultColorPalette(seekcamera_color_palette_t const colorPalette);
 	void setDefaultShutterMode(seekcamera_shutter_mode_t const shutterMode);
-
+	void setDefaultDeviceName(std::string const& deviceName);
+	void setDefaultFrameFormat(seekcamera_frame_format_t const frameFormat);
 
 private:
 
@@ -40,7 +37,7 @@ private:
 
 
 	//chip ids to cameras
-	std::unordered_map< std::string, SeekCamera> m_cameraMap;
+	std::unordered_map< std::string, EchoThermCamera> m_cameraMap;
 	std::string m_defaultDeviceName;
 	seekcamera_color_palette_t m_defaultColorPalette;
 	seekcamera_shutter_mode_t m_defaultShutterMode;

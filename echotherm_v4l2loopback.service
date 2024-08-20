@@ -1,14 +1,14 @@
 [Unit]
-Description=Seek Camera Capture Service
+Description=EchoTherm V4L2 Loopback Capture Service
 # After=video.service
 RequiresMountsFor=/usr
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/seekcamera_capture --configFile /usr/local/bin/seekcamera_capture_config.json
+ExecStart=/usr/local/bin/echotherm_v4l2loopback --configFile /usr/local/bin/echotherm_v4l2loopback_config.json
 StandardOutput=journal
 StandardError=journal
-ExecStartPre=/bin/sleep 15
+#ExecStartPre=/bin/sleep 15
 StandardOutput=journal
 StandardError=journal
 Restart=always

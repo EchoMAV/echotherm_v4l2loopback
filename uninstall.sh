@@ -1,9 +1,9 @@
 #! /bin/bash
-systemctl stop seekcamera_capture&
-systemctl disable seekcamera_capture
-rm /etc/systemd/system/seekcamera_capture.service
-rm /usr/local/bin/seekcamera_capture_config.json
-rm /usr/local/bin/seekcamera_capture
+systemctl stop echotherm_v4l2loopback&
+systemctl disable echotherm_v4l2loopback
+rm /etc/systemd/system/echotherm_v4l2loopback.service
+rm /usr/local/bin/echotherm_v4l2loopback_config.json
+rm /usr/local/bin/echotherm_v4l2loopback
 rm /etc/udev/rules.d/10-seekthermal.rules
 rm -rf /usr/local/include/seekframe
 rm -rf /usr/local/include/seekcamera

@@ -1,0 +1,6 @@
+{
+    "default_color_palette": 0,
+    "default_shutter_mode": 0,
+    "default_frame_format": 1024,
+    "default_device_name": "/dev/video0"
+}

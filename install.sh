@@ -43,13 +43,26 @@ dkms install -m v4l2loopback -v ${version}
 echo "v4l2loopback" > /etc/modules-load.d/v4l2loopback.conf
 # clean up the v4l2loopback source
 rm -rf /usr/src/v4l2loopback-${version}
-# Copy over the auto-start script 
-#mkdir -p /usr/local/echopilot/scripts
-#cp ../seekcamera_capture_autostart.sh /usr/local/echopilot/scripts
-#chmod +x /usr/local/echopilot/scripts/seekcamera_capture_autostart.sh
 
-cp ../seekcamera_capture_config.json /usr/local/bin
+deviceId=$(ls /sys/devices/virtual/video4linux | head -n 1)
+deviceNumber=${deviceId: -1}
 
-cp ../seekcamera_capture.service /etc/systemd/system/
-systemctl start seekcamera_capture&
-systemctl enable seekcamera_capture
+#rename the device
+modprobe v4l2loopback -r
+modprobe v4l2loopback video_nr=$deviceNumber card_label="EchoTherm Video Loopback Device"
+
+#create the config file
+configFile=/usr/local/bin/echotherm_v4l2loopback_config.json
+
+echo "{" >> $configFile
+echo "\"default_color_palette\": 0," >> $configFile
+echo "\"default_shutter_mode\": 0," >> $configFile
+echo "\"default_frame_format\": 1024," >> $configFile
+echo "\"default_device_name\": \"/dev/$deviceId\"" >> $configFile
+echo "}" >> $configFile
+
+#cp ../echotherm_v4l2loopback_config.json /usr/local/bin
+
+cp ../echotherm_v4l2loopback.service /etc/systemd/system/
+systemctl start echotherm_v4l2loopback&
+systemctl enable echotherm_v4l2loopback

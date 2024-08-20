@@ -1,5 +1,5 @@
-#include "SeekCameraLoopHandler.h"
-#include "SeekCamera.h"
+#include "EchoThermCameraLoopHandler.h"
+#include "EchoThermCamera.h"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -8,7 +8,7 @@
 #include <sys/inotify.h>
 #include <csignal>
 
-SeekCameraLoopHandler g_loopHandler;
+EchoThermCameraLoopHandler g_loopHandler;
 
 void sighandler(int signum)
 {
@@ -19,7 +19,7 @@ void sighandler(int signum)
 	exit(0);
 }
 
-void writeConfig(::std::filesystem::path const& path, ::std::unordered_map<::std::string, SeekCamera> & cameraMap)
+void writeConfig(::std::filesystem::path const& path, ::std::unordered_map<::std::string, EchoThermCamera> & cameraMap)
 {
 	boost::property_tree::ptree properties;
 	boost::property_tree::ptree cameraArray;
@@ -38,7 +38,7 @@ void writeConfig(::std::filesystem::path const& path, ::std::unordered_map<::std
 	boost::property_tree::write_json(outputStream, properties, true);
 }
 
-int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map<::std::string, SeekCamera> & cameraMap)
+int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map<::std::string, EchoThermCamera> & cameraMap)
 {
 	int returnCode=1;
 	if(std::filesystem::exists(configFilePath)
@@ -52,8 +52,10 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 			boost::property_tree::read_json(inputStream,properties);
 			seekcamera_color_palette_t defaultColorPallete = (seekcamera_color_palette_t)properties.get<int>("default_color_palette");
 			seekcamera_shutter_mode_t defaultShutterMode = (seekcamera_shutter_mode_t)properties.get<int>("default_shutter_mode");
+			seekcamera_frame_format_t defaultFrameFormat = (seekcamera_frame_format_t)properties.get<int>("default_frame_format");
 			g_loopHandler.setDefaultColorPalette(defaultColorPallete);
 			g_loopHandler.setDefaultShutterMode(defaultShutterMode);
+			g_loopHandler.setDefaultFrameFormat(defaultFrameFormat);
 			auto cameraArrayOpt = properties.get_child_optional("camera_array");
 			if(cameraArrayOpt.is_initialized())
 			{
@@ -65,7 +67,7 @@ int readConfig(std::filesystem::path const& configFilePath, ::std::unordered_map
 					auto colorPalette = (seekcamera_color_palette_t)cameraProps.get<int>("color_palette", (int)defaultColorPallete);
 					auto shutterMode = (seekcamera_shutter_mode_t)cameraProps.get<int>("shutter_mode", (int)defaultShutterMode);
 
-					SeekCamera camera(devicePath, format, colorPalette, shutterMode);
+					EchoThermCamera camera(devicePath, format, colorPalette, shutterMode);
 					cameraMap.emplace(cid, ::std::move(camera));
 				}
 			}
@@ -91,7 +93,7 @@ int main(int argc, char* argv[])
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
 	std::filesystem::path configFilePath{};
-	std::unordered_map<::std::string, SeekCamera> cameraMap{};
+	std::unordered_map<::std::string, EchoThermCamera> cameraMap{};
 	bool proceed=true;
 	if(vm.count("help"))
 	{
@@ -104,8 +106,8 @@ int main(int argc, char* argv[])
 		{
 			configFilePath = vm["configFile"].as<std::filesystem::path>();
 			std::cout<<"configFile = "<<configFilePath<<std::endl;
-			//SeekCamera seekCamera("/dev/video0", SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2, SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
-			//cameraMap.emplace("E452AFB41114", ::std::move(seekCamera)).first;
+			//EchoThermCamera echoThermCamera("/dev/video0", SEEKCAMERA_FRAME_FORMAT_COLOR_YUY2, SEEKCAMERA_COLOR_PALETTE_WHITE_HOT);
+			//cameraMap.emplace("E452AFB41114", ::std::move(echoThermCamera)).first;
 			//std::cout<<"writing to config file "<<std::filesystem::absolute(configFilePath)<<std::endl;
 			//writeConfig(configFilePath, cameraMap);
 		}

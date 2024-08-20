@@ -3,15 +3,15 @@
 #include <mutex>
 #include "seekcamera/seekcamera.h"
 
-class SeekCamera
+class EchoThermCamera
 {
 public:
-	SeekCamera(std::string const& devicePath, seekcamera_frame_format_t format, seekcamera_color_palette_t colorPalette, seekcamera_shutter_mode_t shutterMode);
-	~SeekCamera();
-    SeekCamera(SeekCamera const& that)=delete;
-    SeekCamera(SeekCamera&& that);
-    SeekCamera& operator=(SeekCamera const& that)=delete;
-    SeekCamera& operator=(SeekCamera&& that)=delete;
+	EchoThermCamera(std::string const& devicePath, seekcamera_frame_format_t format, seekcamera_color_palette_t colorPalette, seekcamera_shutter_mode_t shutterMode);
+	~EchoThermCamera();
+    EchoThermCamera(EchoThermCamera const& that)=delete;
+    EchoThermCamera(EchoThermCamera&& that);
+    EchoThermCamera& operator=(EchoThermCamera const& that)=delete;
+    EchoThermCamera& operator=(EchoThermCamera&& that)=delete;
 
 
 	seekcamera_error_t connect(seekcamera_t* p_camera);

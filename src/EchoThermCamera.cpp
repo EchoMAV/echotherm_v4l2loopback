@@ -1,4 +1,4 @@
-#include "SeekCamera.h"
+#include "EchoThermCamera.h"
 #include <iostream>
 #include <fcntl.h>
 #include <cstring>
@@ -9,7 +9,7 @@
 #include <sys/ioctl.h>
 #endif
 
-SeekCamera::SeekCamera(std::string const& devicePath, seekcamera_frame_format_t format, seekcamera_color_palette_t colorPalette, seekcamera_shutter_mode_t shutterMode)
+EchoThermCamera::EchoThermCamera(std::string const& devicePath, seekcamera_frame_format_t format, seekcamera_color_palette_t colorPalette, seekcamera_shutter_mode_t shutterMode)
 	: m_devicePath{devicePath}
 	, m_format{format}
 	, m_colorPalette{ colorPalette }
@@ -21,13 +21,13 @@ SeekCamera::SeekCamera(std::string const& devicePath, seekcamera_frame_format_t 
 {
 }
 
-SeekCamera::~SeekCamera()
+EchoThermCamera::~EchoThermCamera()
 {
 	disconnect();
 }
 
 
-SeekCamera::SeekCamera(SeekCamera&& that)
+EchoThermCamera::EchoThermCamera(EchoThermCamera&& that)
     : m_devicePath{std::move(that.m_devicePath)}
     , m_format{std::move(that.m_format)}
     , m_colorPalette{std::move(that.m_colorPalette)}
@@ -41,32 +41,32 @@ SeekCamera::SeekCamera(SeekCamera&& that)
 }
 
 
-std::string const& SeekCamera::getDevicePath() const
+std::string const& EchoThermCamera::getDevicePath() const
 {
 	return m_devicePath;
 }
-seekcamera_frame_format_t SeekCamera::getFormat() const
+seekcamera_frame_format_t EchoThermCamera::getFormat() const
 {
 	return m_format;
 }
-seekcamera_color_palette_t SeekCamera::getColorPalette() const
+seekcamera_color_palette_t EchoThermCamera::getColorPalette() const
 {
 	return m_colorPalette;
 }
 
-seekcamera_shutter_mode_t SeekCamera::getShutterMode() const
+seekcamera_shutter_mode_t EchoThermCamera::getShutterMode() const
 {
 	return m_shutterMode;
 }
 
-seekcamera_error_t SeekCamera::openSession(bool reconnect)
+seekcamera_error_t EchoThermCamera::openSession(bool reconnect)
 {
 	// Register a frame available callback function.
 	seekcamera_error_t status = SEEKCAMERA_SUCCESS;
 	if(!reconnect)
 	{
 		status = seekcamera_register_frame_available_callback(mp_camera, [](seekcamera_t*, seekcamera_frame_t* p_cameraFrame, void* p_userData) {
-		auto* p_cameraData = (SeekCamera*)p_userData;
+		auto* p_cameraData = (EchoThermCamera*)p_userData;
 		p_cameraData->handleCameraFrameAvailable(p_cameraFrame);
 		}, (void*)this);
 	}
@@ -110,7 +110,7 @@ seekcamera_error_t SeekCamera::openSession(bool reconnect)
 	return status;
 }
 
-seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)
+seekcamera_error_t EchoThermCamera::connect(seekcamera_t* p_camera)
 {
 	disconnect();
 	mp_camera = p_camera;
@@ -118,7 +118,7 @@ seekcamera_error_t SeekCamera::connect(seekcamera_t* p_camera)
 }
 
 
-seekcamera_error_t SeekCamera::closeSession()
+seekcamera_error_t EchoThermCamera::closeSession()
 {
 	auto const status = seekcamera_capture_session_stop(mp_camera);
 	if (status != SEEKCAMERA_SUCCESS)
@@ -129,7 +129,7 @@ seekcamera_error_t SeekCamera::closeSession()
 }
 
 
-seekcamera_error_t SeekCamera::disconnect()
+seekcamera_error_t EchoThermCamera::disconnect()
 {
 	m_timeoutCount=0;
 	seekcamera_error_t status = SEEKCAMERA_SUCCESS;
@@ -146,7 +146,7 @@ seekcamera_error_t SeekCamera::disconnect()
 	return status;
 }
 
-seekcamera_error_t SeekCamera::handleReadyToPair(seekcamera_t* p_camera)
+seekcamera_error_t EchoThermCamera::handleReadyToPair(seekcamera_t* p_camera)
 {
 	// Attempt to pair the camera automatically.
 	// Pairing refers to the process by which the sensor is associated with the host and the embedded processor.
@@ -160,7 +160,7 @@ seekcamera_error_t SeekCamera::handleReadyToPair(seekcamera_t* p_camera)
 	return status;
 }
 
-int SeekCamera::openDevice(int width, int height)
+int EchoThermCamera::openDevice(int width, int height)
 {
 	//TODO find a way to detect the format automatically
 #ifdef __linux__
@@ -218,17 +218,17 @@ int SeekCamera::openDevice(int width, int height)
 	return returnCode;
 }
 
-int SeekCamera::recordTimeout()
+int EchoThermCamera::recordTimeout()
 {
 	return ++m_timeoutCount;
 }
 
-void SeekCamera::resetTimeouts()
+void EchoThermCamera::resetTimeouts()
 {
 	m_timeoutCount=0;
 }
 
-void SeekCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
+void EchoThermCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
 {
 	// This mutex is used to serialize access to the frame member of the renderer.
 	// In the future the single frame member should be replaced with something like a FIFO
@@ -267,7 +267,7 @@ void SeekCamera::handleCameraFrameAvailable(seekcamera_frame_t* p_cameraframe)
 }
 
 
-seekcamera_error_t SeekCamera::triggerShutter()
+seekcamera_error_t EchoThermCamera::triggerShutter()
 {
 	auto const status = seekcamera_shutter_trigger(mp_camera);
 	if(status != SEEKCAMERA_SUCCESS)
